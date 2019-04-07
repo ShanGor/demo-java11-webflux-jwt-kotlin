@@ -1,9 +1,12 @@
 # Demo for Java11 Spring boot projects with webflux, JWT
 
-It show how you can generate a JWT token, and verify it in resource.  
-To run it, you need to set an environment variable JWT_HEADER, which is the header key you need to put to the HTTP Header while you access the resource.
+It is for the use case of `API <--> Consumer`, not for `Browser <--> Server`. Because it does not have `userDetails`. And you should separate the `JWT` generation and verification to `Consumer` and `API` server. 
 
-For Example:
+
+It show how you can generate a JWT token, and verify it in resource.  
+To run it, you need to set an environment variable `JWT_HEADER`, which is the header key you need to put to the HTTP Header while you access the resource.
+
+For Example you start the app with below command line:
 ```
 export JWT_HEADER=X-COMFORTHEART-JWT && java -jar target/demo-java11-webflux-0.0.1-SNAPSHOT.jar
 ```
@@ -16,7 +19,7 @@ Content-Length: 155
 
 eyJhbGciOiJFUzI1NiJ9.eyJuYmYiOjE1NTQ2MjA0MzUsImV4cCI6MTU1NDYyMTAzNX0.J8YrBWv12kXdcRpKuCHZ6xCSdCAm_rvblobH5m0ERBNRA53F_E7U1AId5HtaJfZA0j_Gi7wREmg_Dl4iq5zTkA
 
-# While you get the token above, use it in your command:
+-- While you get the token above, use it in your command:
 $ curl -i --header "X-COMFORTHEART-JWT: eyJhbGciOiJFUzI1NiJ9.eyJuYmYiOjE1NTQ2MjA0MzUsImV4cCI6MTU1NDYyMTAzNX0.J8YrBWv12kXdcRpKuCHZ6xCSdCAm_rvblobH5m0ERBNRA53F_E7U1AId5HtaJfZA0j_Gi7wREmg_Dl4iq5zTkA" http://localhost:8080/api/test
 
 ```
