@@ -17,7 +17,7 @@ Content-Length: 155
 eyJhbGciOiJFUzI1NiJ9.eyJuYmYiOjE1NTQ2MjA0MzUsImV4cCI6MTU1NDYyMTAzNX0.J8YrBWv12kXdcRpKuCHZ6xCSdCAm_rvblobH5m0ERBNRA53F_E7U1AId5HtaJfZA0j_Gi7wREmg_Dl4iq5zTkA
 
 # While you get the token above, use it in your command:
-$ curl -i --header "X-HSBC-JWT: eyJhbGciOiJFUzI1NiJ9.eyJuYmYiOjE1NTQ2MjA0MzUsImV4cCI6MTU1NDYyMTAzNX0.J8YrBWv12kXdcRpKuCHZ6xCSdCAm_rvblobH5m0ERBNRA53F_E7U1AId5HtaJfZA0j_Gi7wREmg_Dl4iq5zTkA" http://localhost:8080/api/test
+$ curl -i --header "X-COMFORTHEART-JWT: eyJhbGciOiJFUzI1NiJ9.eyJuYmYiOjE1NTQ2MjA0MzUsImV4cCI6MTU1NDYyMTAzNX0.J8YrBWv12kXdcRpKuCHZ6xCSdCAm_rvblobH5m0ERBNRA53F_E7U1AId5HtaJfZA0j_Gi7wREmg_Dl4iq5zTkA" http://localhost:8080/api/test
 
 ```
 
