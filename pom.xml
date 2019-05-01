@@ -36,6 +36,49 @@
 			<groupId>org.jetbrains.kotlin</groupId>
 			<artifactId>kotlin-stdlib</artifactId>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-compiler -->
+		<dependency>
+			<groupId>org.jetbrains.kotlin</groupId>
+			<artifactId>kotlin-compiler-embeddable</artifactId>
+			<version>${kotlin.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jetbrains.kotlin</groupId>
+			<artifactId>kotlin-script-runtime</artifactId>
+			<version>${kotlin.version}</version>
+		</dependency>
+		<dependency>
+		<groupId>org.jetbrains.kotlin</groupId>
+		<artifactId>kotlin-script-util</artifactId>
+			<version>${kotlin.version}</version>
+		</dependency>
+		<dependency>
+		<groupId>org.jetbrains.kotlin</groupId>
+		<artifactId>kotlin-scripting-compiler-embeddable</artifactId>
+			<version>${kotlin.version}</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.mariuszgromada.math/MathParser.org-mXparser -->
+		<dependency>
+			<groupId>org.mariuszgromada.math</groupId>
+			<artifactId>MathParser.org-mXparser</artifactId>
+			<version>4.3.3</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.luaj/luaj-jse -->
+		<dependency>
+			<groupId>org.luaj</groupId>
+			<artifactId>luaj-jse</artifactId>
+			<version>3.0.1</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.jruby/jruby -->
+		<dependency>
+			<groupId>org.jruby</groupId>
+			<artifactId>jruby</artifactId>
+			<version>9.2.7.0</version>
+		</dependency>
+
 
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
@@ -53,6 +96,16 @@
 			<artifactId>reactor-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.codehaus.groovy/groovy-all -->
+		<dependency>
+			<groupId>org.codehaus.groovy</groupId>
+			<artifactId>groovy-all</artifactId>
+			<version>2.5.6</version>
+			<type>pom</type>
+		</dependency>
+
+
 
 		<!-- To include the packages which is missing in Java 11 -->
 		<dependency>
