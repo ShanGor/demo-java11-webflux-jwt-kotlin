@@ -42,3 +42,9 @@ keytool -exportcert -keystore demo.jks -file demo.cer -alias E2E_Alias -storepas
 # Ref commands for RSA key generation too, but if you use it, need to do some code changes
 keytool -genkeypair -alias E2E_Alias -sigalg SHA256withRSA -keystore demo.jks -storetype jks -keysize 2048 -keyalg RSA -dname "CN=Consumer,OU=TechDept,O=Comfortheart.tech,L=GZ,ST=GD,C=China" -storepass changeit
 ```
+
+
+# There is also a poc for formula engines
+> Finally found Lua is the fastest, while JRuby is the best because it can reach the balance of performance, user-friendly and accuracy.
+
+Please ref to https://github.com/jruby/jruby/wiki/RedBridge
