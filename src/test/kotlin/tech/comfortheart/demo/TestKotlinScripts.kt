@@ -1,6 +1,11 @@
 package tech.comfortheart.demo
 
+import org.jruby.RubyInstanceConfig
+import org.jruby.embed.LocalContextScope
+import org.jruby.embed.LocalVariableBehavior
+import org.jruby.embed.PathType
 import org.jruby.embed.ScriptingContainer
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.luaj.vm2.lib.jse.JsePlatform
@@ -24,11 +29,7 @@ import org.luaj.vm2.lib.jse.LuajavaLib
 import org.luaj.vm2.lib.PackageLib
 import org.luaj.vm2.lib.jse.JseBaseLib
 import org.luaj.vm2.Globals
-
-
-
-
-
+import java.util.concurrent.CountDownLatch
 
 
 @RunWith(SpringRunner::class)
@@ -37,8 +38,21 @@ class TestKotlinScripts {
     @Value("classpath:formula/MyFormula.kts")
     lateinit var myFormulaResource: Resource
 
+    @Value("classpath:formula/MyFormula.rb")
+    lateinit var rubyFormulaResource: Resource
+
+    val predefinedRuby = "formula/PredefinedRuby.rb"
+    val rubyFormulaPath = "formula/MyFormula.rb"
+
     @Autowired
     lateinit var context: ApplicationContext
+
+    @Before
+    fun init() {
+        val container = ScriptingContainer(LocalContextScope.CONCURRENT, LocalVariableBehavior.PERSISTENT)
+        container.compileMode = RubyInstanceConfig.CompileMode.JIT
+        container.runScriptlet(PathType.CLASSPATH, predefinedRuby);
+    }
 
     @Test
     fun testScript(){
@@ -127,8 +141,9 @@ class TestKotlinScripts {
 
     @Test
     fun testRuby() {
+        System.setProperty("org.jruby.embed.compilemode", "jit")
         val mgr = ScriptEngineManager()
-        val e = mgr.getEngineByName("ruby")
+        val e = mgr.getEngineByName("jruby")
         e.eval("1+2")
         val timer = Timer()
         e.put("x", 25)
@@ -136,30 +151,115 @@ class TestKotlinScripts {
         var y = e.get("y")
         var timeElapsed = timer.elapsedMillisecs()
         println("y=$y, in $timeElapsed milliseconds")
+
+        val sourceStr = String(rubyFormulaResource.inputStream.readAllBytes())
+        timer.reset()
+        e.eval(sourceStr)
+        y = e.get("res")
+        timeElapsed = timer.elapsedMillisecs()
+        println("y=$y, in $timeElapsed milliseconds")
+
+        timer.reset()
+        e.eval(sourceStr)
+        y = e.get("res")
+        timeElapsed = timer.elapsedMillisecs()
+        println("y=$y, in $timeElapsed milliseconds")
     }
 
+    /**
+     * Concurrent: Avoid to update global variables/constants. Can use local variables freely.
+     * This model isolates variable maps but shares Ruby runtime. A single ScriptingContainer created only one runtime and thread local variable maps. Global variables and top level variables/constants are not thread safe, but variables/constants tied to receiver objects are thread local.
+     * +------------------+ +------------------+ +------------------+
+     * |   Variable Map   | |   Variable Map   | |   Variable Map   |
+     * +------------------+ +------------------+ +------------------+
+     * +------------------------------------------------------------+
+     * |                        Ruby runtime                        |
+     * +------------------------------------------------------------+
+     * +------------------------------------------------------------+
+     * |                     ScriptingContainer                     |
+     * +------------------------------------------------------------+
+     * +------------------+ +------------------+ +------------------+
+     * |   Java Thread    | |   Java Thread    | |   Java Thread    |
+     * +------------------+ +------------------+ +------------------+
+     * +------------------------------------------------------------+
+     * |                         JVM                                |
+     * +------------------------------------------------------------+
+ *
+     * Concurrent Local Context Type
+     * (Per Thread Isolated Variable Map and Singleton Runtime)
+     */
     @Test
     fun testRubyRedBridge() {
-        val container = ScriptingContainer()
-        container.runScriptlet("2");
+        val hey = { name: String ->
+            val timerTt = Timer()
+            val container = ScriptingContainer(LocalContextScope.CONCURRENT, LocalVariableBehavior.PERSISTENT)
+            container.compileMode = RubyInstanceConfig.CompileMode.JIT
+            container.runScriptlet(PathType.CLASSPATH, predefinedRuby);
 
-        var timer = Timer()
-        container.put("x", 21)
-        var res = container.runScriptlet("2*x");
-        var timeElapsed = timer.elapsedMillisecs()
-        println("result is $res, in $timeElapsed milliseconds")
+            var timer = Timer()
+            container.put("x", 21)
+            var res = container.runScriptlet("2*x");
+            var timeElapsed = timer.elapsedMillisecs()
+            println("Thread $name, result is $res, in $timeElapsed milliseconds")
 
-        timer.reset()
-        container.put("x", 25)
-        res = container.runScriptlet("2*x");
-        timeElapsed = timer.elapsedMillisecs()
-        println("result is $res, in $timeElapsed milliseconds")
+            timer.reset()
+            container.put("x", 25)
+            res = container.runScriptlet("2*x");
+            timeElapsed = timer.elapsedMillisecs()
+            println("Thread $name, result is $res, in $timeElapsed milliseconds")
 
-        timer.reset()
-        container.put("x", 53)
-        res = container.runScriptlet("2*x");
-        timeElapsed = timer.elapsedMillisecs()
-        println("result is $res, in $timeElapsed milliseconds")
+            timer.reset()
+            container.put("x", 53)
+            res = container.runScriptlet("2*x");
+            timeElapsed = timer.elapsedMillisecs()
+            println("Thread $name, result is $res, in $timeElapsed milliseconds")
+
+
+            timer.reset()
+            container.put("givenAmount", "10")
+            container.runScriptlet(PathType.CLASSPATH, rubyFormulaPath)
+            var y = container.get("res")
+            timeElapsed = timer.elapsedMillisecs()
+            println("Thread $name, y1=$y, in $timeElapsed milliseconds")
+            timer.reset()
+            container.put("givenAmount", "11")
+            container.runScriptlet(PathType.CLASSPATH, rubyFormulaPath)
+            y = container.get("res")
+            timeElapsed = timer.elapsedMillisecs()
+            println("Thread $name, y2=$y, in $timeElapsed milliseconds")
+            timer.reset()
+            container.put("givenAmount", "12")
+            container.runScriptlet(PathType.CLASSPATH, rubyFormulaPath)
+            y = container.get("res")
+            timeElapsed = timer.elapsedMillisecs()
+            println("Thread $name, y3=$y, in $timeElapsed milliseconds")
+
+            val totalTime = timerTt.elapsedMillisecs()
+            println("Thread $name, Total $totalTime milliseconds elapsed!")
+        }
+
+        val countDownLatch = CountDownLatch(4)
+        Thread {
+            hey("1")
+            countDownLatch.countDown()
+        }.start()
+
+        Thread {
+            hey("2")
+            countDownLatch.countDown()
+        }.start()
+
+        Thread {
+            hey("3")
+            countDownLatch.countDown()
+        }.start()
+
+        Thread {
+            hey("4")
+            countDownLatch.countDown()
+        }.start()
+
+        countDownLatch.await()
     }
 }
 
