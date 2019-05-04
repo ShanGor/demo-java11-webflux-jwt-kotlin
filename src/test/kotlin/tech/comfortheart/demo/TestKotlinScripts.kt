@@ -29,6 +29,7 @@ import org.luaj.vm2.lib.jse.LuajavaLib
 import org.luaj.vm2.lib.PackageLib
 import org.luaj.vm2.lib.jse.JseBaseLib
 import org.luaj.vm2.Globals
+import org.mariuszgromada.math.mxparser.Function
 import java.util.concurrent.CountDownLatch
 
 
@@ -98,6 +99,18 @@ class TestKotlinScripts {
         expression = Expression("y*2")
         expression.addArguments(Argument("y", 13.0))
         res = expression.calculate()
+        elapsedTime = timer.elapsedMillisecs()
+        println("Result is $res with $elapsedTime milliseconds")
+
+        timer.reset()
+        val f = Function("fact(x)=if(x>1, fact(x-1)*x, x)")
+        expression = Expression("fact(10)", f)
+        res = expression.calculate()
+        elapsedTime = timer.elapsedMillisecs()
+        println("Result is $res with $elapsedTime milliseconds")
+
+        timer.reset()
+        res = f.calculate(100.0)
         elapsedTime = timer.elapsedMillisecs()
         println("Result is $res with $elapsedTime milliseconds")
 
